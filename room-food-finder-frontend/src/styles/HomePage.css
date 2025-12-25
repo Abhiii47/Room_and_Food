@@ -1,0 +1,228 @@
+/* Clean Homepage.css - Shadcn/UI Style */
+
+.homepage {
+  min-height: calc(100vh - 4rem);
+}
+
+/* Hero Section */
+.hero {
+  padding: 4rem 0 6rem;
+  text-align: center;
+  background-color: hsl(var(--background));
+}
+
+.hero-content {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  color: hsl(var(--foreground));
+  letter-spacing: -0.05em;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+/* Search Form */
+.search-form {
+  display: flex;
+  max-width: 32rem;
+  margin: 0 auto;
+  gap: 0.5rem;
+}
+
+.search-input {
+  flex: 1;
+  height: 3rem;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--background));
+  padding: 0 1rem;
+  font-size: 1rem;
+  transition: border-color 0.15s;
+}
+
+.search-input:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.search-input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.search-button {
+  height: 3rem;
+  padding: 0 1.5rem;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.search-button:hover {
+  background-color: hsl(var(--primary) / 0.9);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 12px hsla(var(--primary) / 0.3);
+}
+
+.search-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Browse Categories Section */
+.browse-category {
+  padding: 4rem 0;
+}
+
+.browse-category h2 {
+  text-align: center;
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 3rem;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Category Card */
+.category-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+  padding: 2rem;
+  text-align: center;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  will-change: transform;
+  opacity: 0;
+  animation: fadeSlideUp 0.6s var(--ease-smooth) forwards;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.category-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.category-card:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px) scale(1.02);
+  border-color: hsl(var(--ring) / 0.3);
+}
+
+.category-card svg {
+  width: 3rem;
+  height: 3rem;
+  color: hsl(var(--primary));
+  margin-bottom: 1rem;
+}
+
+.category-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: hsl(var(--foreground));
+}
+
+.category-card p {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .hero {
+    padding: 2rem 0 3rem;
+  }
+
+  .hero-title {
+    font-size: 2.25rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.125rem;
+  }
+
+  .search-form {
+    flex-direction: column;
+    max-width: 20rem;
+  }
+
+  .search-input,
+  .search-button {
+    width: 100%;
+  }
+
+  .browse-category {
+    padding: 3rem 0;
+  }
+
+  .browse-category h2 {
+    font-size: 1.875rem;
+    margin-bottom: 2rem;
+  }
+
+  .category-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0 0.75rem;
+  }
+
+  .category-card {
+    padding: 1.5rem;
+  }
+
+  .category-card svg {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content {
+    padding: 0 0.75rem;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .search-form {
+    max-width: 100%;
+  }
+}
