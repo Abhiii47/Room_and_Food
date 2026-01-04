@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
+import api from '../api/apiClient';
 
 const AuthContext = createContext();
 
@@ -13,6 +14,23 @@ export const AuthProvider = ({ children }) => {
             setUser(JSON.parse(storedUser));
         }
         setLoading(false);
+
+        // Add response interceptor to handle 401s
+        const interceptor = api.interceptors.response.use(
+            (response) => response,
+            (error) => {
+                if (error.response && error.response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    setUser(null);
+                }
+                return Promise.reject(error);
+            }
+        );
+
+        return () => {
+            api.interceptors.response.eject(interceptor);
+        };
     }, []);
 
     const login = (userData, token) => {
