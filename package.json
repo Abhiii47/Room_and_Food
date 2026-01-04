@@ -1,0 +1,12 @@
+{
+    "name": "room-food-finder-root",
+    "private": true,
+    "scripts": {
+        "start": "cd backend && npm start",
+        "build": "cd backend && npm install",
+        "postinstall": "cd backend && npm install"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
