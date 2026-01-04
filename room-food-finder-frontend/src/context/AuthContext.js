@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
         }
         setLoading(false);
 
-        // Add response interceptor to handle 401s
+        // Add response interceptor to handle 401s (Unauthorized) - Auto Logout
         const interceptor = api.interceptors.response.use(
             (response) => response,
             (error) => {
