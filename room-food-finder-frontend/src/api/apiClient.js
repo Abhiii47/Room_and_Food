@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+// Use proxy in development (configured in package.json) or absolute URL from env
+const baseURL = process.env.REACT_APP_API_URL || '/api';
+
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api'
+  baseURL: baseURL
 });
 
 // Add the interceptor to include the token in headers

@@ -15,12 +15,13 @@ const Chat = () => {
 
   // Fetch user's conversations
   useEffect(() => {
-    if (!user || !user.id) {
+    const userId = user?._id || user?.id;
+    if (!user || !userId) {
       setLoading(false);
       return;
     }
 
-    const q = query(collection(db, 'chatts'), where('participants', 'array-contains', user.id));
+    const q = query(collection(db, 'chatts'), where('participants', 'array-contains', userId));
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const userConversations = querySnapshot.docs.map(doc => ({
@@ -35,7 +36,7 @@ const Chat = () => {
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user?._id, user?.id]);
 
   // Fetch messages for the active conversation
   useEffect(() => {
@@ -60,10 +61,11 @@ const Chat = () => {
     if (newMessage.trim() === '' || !activeConversation) return;
 
     const messagesRef = collection(db, 'chatts', activeConversation.id, 'messages');
+    const userId = user?._id || user?.id;
 
     await addDoc(messagesRef, {
       text: newMessage,
-      senderId: user.id,
+      senderId: userId,
       timestamp: serverTimestamp()
     });
 
@@ -106,11 +108,14 @@ const Chat = () => {
               <h3>{activeConversation.otherUserName || 'Chat'}</h3>
             </div>
             <div className="message-list">
-              {messages.map((msg) => (
-                <div key={msg.id} className={`message-item ${msg.senderId === user.id ? 'sent' : 'received'}`}>
-                  <div className="message-bubble">{msg.text}</div>
-                </div>
-              ))}
+              {messages.map((msg) => {
+                const userId = user?._id || user?.id;
+                return (
+                  <div key={msg.id} className={`message-item ${msg.senderId === userId ? 'sent' : 'received'}`}>
+                    <div className="message-bubble">{msg.text}</div>
+                  </div>
+                );
+              })}
             </div>
             <form onSubmit={handleSendMessage} className="message-input-area">
               <input

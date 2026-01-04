@@ -18,12 +18,12 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// public: get all listings (with basic filters)
+// public: get all listings (with basic filters) - NO AUTH REQUIRED
 router.get('/', async (req,res) => {
   try {
-    const q = {};
+    const q = { published: true }; // Only show published listings by default
     if (req.query.type) q.type = req.query.type;
-    if (req.query.published) q.published = req.query.published === 'true';
+    if (req.query.published !== undefined) q.published = req.query.published === 'true';
     const list = await Listing.find(q).sort({ createdAt: -1 }).limit(200);
     res.json(list);
   } catch (e) { res.status(500).json({ message: e.message }); }
@@ -42,9 +42,8 @@ router.post('/', requireAuth, requireProvider, upload.array('images', 6), async 
   try {
     const body = req.body;
     if (!body.title) return res.status(400).json({ message: 'Title is required' });
-    if (!body.lat || !body.lng) return res.status(400).json({ message: 'Latitude and longitude are required' });
     
-    const imageFiles = (req.files || []).map(f => `${process.env.BASE_URL || ''}/uploads/${path.basename(f.path)}`);
+    const imageFiles = (req.files || []).map(f => `${process.env.BASE_URL || 'http://localhost:5000'}/uploads/${path.basename(f.path)}`);
     const doc = new Listing({
       title: body.title,
       description: body.description,
@@ -54,11 +53,11 @@ router.post('/', requireAuth, requireProvider, upload.array('images', 6), async 
       imageUrl: imageFiles[0] || body.imageUrl,
       owner: req.user._id,
       hostName: req.user.name,
-      lat: Number(body.lat),
-      lng: Number(body.lng),
+      lat: body.lat ? Number(body.lat) : undefined,
+      lng: body.lng ? Number(body.lng) : undefined,
       type: body.type || body.category || 'room',
-      tags: (body.tags && body.tags.split?.(',')) || [],
-      amenities: (body.amenities && body.amenities.split?.(',')) || []
+      tags: (body.tags && typeof body.tags === 'string' ? body.tags.split(',') : (Array.isArray(body.tags) ? body.tags : [])).map(t => t.trim()).filter(t => t),
+      amenities: (body.amenities && typeof body.amenities === 'string' ? body.amenities.split(',') : (Array.isArray(body.amenities) ? body.amenities : [])).map(a => a.trim()).filter(a => a)
     });
     await doc.save();
     res.json(doc);
@@ -80,9 +79,31 @@ router.put('/:id', requireAuth, requireProvider, upload.array('images', 6), asyn
     const listing = await Listing.findById(req.params.id);
     if (!listing) return res.status(404).json({ message: 'Not found' });
     if (!listing.owner.equals(req.user._id) && req.user.role !== 'admin') return res.status(403).json({ message: 'Not allowed' });
-    const imageFiles = (req.files || []).map(f => `${process.env.BASE_URL || ''}/uploads/${path.basename(f.path)}`);
-    Object.assign(listing, { ...req.body });
-    if (imageFiles.length) listing.images = (listing.images || []).concat(imageFiles);
+    const imageFiles = (req.files || []).map(f => `${process.env.BASE_URL || 'http://localhost:5000'}/uploads/${path.basename(f.path)}`);
+    
+    // Update fields
+    if (req.body.title) listing.title = req.body.title;
+    if (req.body.description !== undefined) listing.description = req.body.description;
+    if (req.body.address !== undefined) listing.address = req.body.address;
+    if (req.body.price !== undefined) listing.price = req.body.price ? Number(req.body.price) : undefined;
+    if (req.body.type !== undefined) listing.type = req.body.type;
+    if (req.body.lat !== undefined) listing.lat = req.body.lat ? Number(req.body.lat) : undefined;
+    if (req.body.lng !== undefined) listing.lng = req.body.lng ? Number(req.body.lng) : undefined;
+    
+    // Handle tags and amenities
+    if (req.body.tags !== undefined) {
+      listing.tags = (typeof req.body.tags === 'string' ? req.body.tags.split(',') : (Array.isArray(req.body.tags) ? req.body.tags : [])).map(t => t.trim()).filter(t => t);
+    }
+    if (req.body.amenities !== undefined) {
+      listing.amenities = (typeof req.body.amenities === 'string' ? req.body.amenities.split(',') : (Array.isArray(req.body.amenities) ? req.body.amenities : [])).map(a => a.trim()).filter(a => a);
+    }
+    
+    // Add new images
+    if (imageFiles.length) {
+      listing.images = (listing.images || []).concat(imageFiles);
+      if (!listing.imageUrl) listing.imageUrl = imageFiles[0];
+    }
+    
     await listing.save();
     res.json(listing);
   } catch (e) { res.status(500).json({ message: e.message }); }

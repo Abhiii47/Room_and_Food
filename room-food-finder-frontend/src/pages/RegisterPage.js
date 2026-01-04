@@ -22,9 +22,13 @@ const RegisterPage = () => {
     e.preventDefault();
     try {
       const res = await registerUser(formData);
-      // Registration successful
-      // Here you would redirect the user to the dashboard or login page
-      // window.location.href = '/dashboard';
+      // Registration successful - save token and redirect to login
+      if (res.token) {
+        localStorage.setItem('token', res.token);
+        localStorage.setItem('user', JSON.stringify(res.user));
+      }
+      // Redirect to home page after successful registration
+      window.location.href = '/';
     } catch (err) {
       setError(err);
       console.error('Registration failed:', err);

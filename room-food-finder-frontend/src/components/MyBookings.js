@@ -23,10 +23,9 @@ const MyBookings = () => {
   };
 
   useEffect(() => {
-    if (user && user.userType === 'student') {
+    if (user) {
       fetchMyBookings();
     } else {
-      setError('Only students can view bookings');
       setLoading(false);
     }
   }, [user]);
@@ -45,25 +44,19 @@ const MyBookings = () => {
 
   const getStatusBadge = (status) => {
     const statusClasses = {
+      requested: 'status-pending',
       pending: 'status-pending',
+      approved: 'status-confirmed',
       confirmed: 'status-confirmed',
+      rejected: 'status-cancelled',
       cancelled: 'status-cancelled',
       completed: 'status-completed'
     };
 
-    return <span className={`status-badge ${statusClasses[status]}`}>{status.toUpperCase()}</span>;
+    return <span className={`status-badge ${statusClasses[status] || 'status-pending'}`}>{status.toUpperCase()}</span>;
   };
 
   if (loading) return <p>Loading your bookings...</p>;
-
-  if (user && user.userType !== 'student') {
-    return (
-      <div className="my-bookings-container">
-        <h2>Access Denied</h2>
-        <p>Only students can view bookings.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="my-bookings-container">
@@ -80,7 +73,7 @@ const MyBookings = () => {
           </svg>
           <h3>No Bookings Yet</h3>
           <p>You haven't made any bookings yet. Browse listings to find your perfect room or food service!</p>
-          <Link to="/listings" className="btn-primary">Browse Listings</Link>
+          <Link to="/" className="btn-primary">Browse Listings</Link>
         </div>
       ) : (
         <div className="bookings-list">
@@ -97,16 +90,21 @@ const MyBookings = () => {
                 </div>
                 <div className="booking-details">
                   <h3>{booking.listing.title}</h3>
-                  <p className="vendor-name">Vendor: {booking.vendor ? booking.vendor.name : 'Unknown Vendor'}</p>
-                  <p className="booking-type">Type: {booking.listing.listingType}</p>
-                  <p className="booking-price">Price: ${booking.listing.price}/month</p>
+                  <p className="booking-type">Type: {booking.listing.type || 'N/A'}</p>
+                  <p className="booking-price">Price: ₹{booking.listing.price || 'N/A'}/month</p>
                   <p className="booking-date">Booked on: {new Date(booking.createdAt).toLocaleDateString()}</p>
-                  {booking.bookingDate && (
-                    <p className="start-date">Start Date: {new Date(booking.bookingDate).toLocaleDateString()}</p>
+                  {booking.fromDate && (
+                    <p className="start-date">From: {new Date(booking.fromDate).toLocaleDateString()}</p>
+                  )}
+                  {booking.toDate && (
+                    <p className="end-date">To: {new Date(booking.toDate).toLocaleDateString()}</p>
+                  )}
+                  {booking.status && (
+                    <p className="booking-status">Status: {booking.status}</p>
                   )}
                 </div>
                 <div className="booking-actions">
-                  {getStatusBadge(booking.status)}
+                  {getStatusBadge(booking.status || 'requested')}
                   <div className="action-buttons">
                     <Link
                       to={`/listings/${booking.listing._id}`}
@@ -114,21 +112,13 @@ const MyBookings = () => {
                     >
                       View Listing
                     </Link>
-                    {booking.status === 'pending' && (
+                    {(booking.status === 'requested' || booking.status === 'pending') && (
                       <button
                         onClick={() => handleCancelBooking(booking._id)}
                         className="btn-cancel"
                       >
                         Cancel
                       </button>
-                    )}
-                    {booking.vendor && (
-                      <Link
-                        to={`/dashboard/chat?vendorId=${booking.vendor._id}`}
-                        className="btn-chat"
-                      >
-                        Message Vendor
-                      </Link>
                     )}
                   </div>
                 </div>

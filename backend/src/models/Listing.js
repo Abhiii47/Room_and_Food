@@ -15,6 +15,8 @@ const listingSchema = new mongoose.Schema({
   type: String,               // 'room' | 'food' | 'both' | free text
   tags: [String],
   amenities: [String],
+  averageRating: { type: Number, default: 0 },
+  reviewCount: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
   published: { type: Boolean, default: true }
 });

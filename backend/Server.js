@@ -39,10 +39,12 @@ app.get('/health', (req, res) => {
 });
 
 // API routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/listings', require('./routes/listings'));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/bookings', require('./routes/bookings'));
+app.use('/api/auth', require('./src/routes/auth'));
+app.use('/api/listings', require('./src/routes/listings'));
+app.use('/api/users', require('./src/routes/users'));
+app.use('/api/bookings', require('./src/routes/bookings'));
+app.use('/api/reviews', require('./src/routes/reviews'));
+app.use('/api/admin', require('./src/routes/admin'));
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {

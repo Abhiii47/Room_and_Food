@@ -5,12 +5,18 @@ const Booking = require('../models/Booking');
 const Listing = require('../models/Listing');
 const { requireAuth, requireProvider } = require('../middleware/auth');
 
-// create booking (any authenticated user)
+// create booking (any authenticated user, but not providers booking their own listings)
 router.post('/', requireAuth, async (req,res) => {
   try {
     const { listingId, fromDate, toDate } = req.body;
     const listing = await Listing.findById(listingId);
     if (!listing) return res.status(404).json({ message: 'Listing not found' });
+    
+    // Prevent vendors from booking their own listings
+    if (listing.owner.equals(req.user._id)) {
+      return res.status(403).json({ message: 'You cannot book your own listing' });
+    }
+    
     const book = new Booking({
       listing: listing._id,
       user: req.user._id,
@@ -37,7 +43,10 @@ router.get('/requests', requireAuth, requireProvider, async (req,res) => {
   try {
     const listings = await Listing.find({ owner: req.user._id }).select('_id');
     const listingIds = listings.map(l => l._id);
-    const reqs = await Booking.find({ listing: { $in: listingIds } }).populate('user', 'name email').populate('listing', 'title');
+    const reqs = await Booking.find({ listing: { $in: listingIds } })
+      .populate('user', 'name email')
+      .populate('listing', 'title address price images imageUrl type')
+      .sort({ createdAt: -1 });
     res.json(reqs);
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
@@ -49,6 +58,18 @@ router.post('/:id/respond', requireAuth, requireProvider, async (req,res) => {
     if (!booking) return res.status(404).json({ message: 'Not found' });
     if (!booking.listing.owner.equals(req.user._id) && req.user.role !== 'admin') return res.status(403).json({ message: 'Not allowed' });
     booking.status = req.body.approve ? 'approved' : 'rejected';
+    await booking.save();
+    res.json(booking);
+  } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
+// cancel booking (user can cancel their own booking)
+router.post('/:id/cancel', requireAuth, async (req,res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: 'Not found' });
+    if (!booking.user.equals(req.user._id) && req.user.role !== 'admin') return res.status(403).json({ message: 'Not allowed' });
+    booking.status = 'cancelled';
     await booking.save();
     res.json(booking);
   } catch (e) { res.status(500).json({ message: e.message }); }
