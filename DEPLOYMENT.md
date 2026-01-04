@@ -73,6 +73,32 @@
 
 ---
 
+## Backend Deployment on Railway
+
+### Setup Steps:
+1. **Create a Service:**
+   - Go to [railway.app](https://railway.app)
+   - Click "New Project" -> "Deploy from GitHub repo"
+   - Select your repository
+
+2. **Configuration:**
+   - Railway should automatically detect the `package.json` at the root.
+   - It will run `npm install` (which triggers `postinstall` to install backend deps) and then `npm start` (which runs the backend).
+
+3. **Environment Variables:**
+   - Go to the "Variables" tab in your service.
+   - Add the same variables as described for Render:
+     - `NODE_ENV`: `production`
+     - `MONGO_URI`: Your MongoDB connection string
+     - `JWT_SECRET`: Your secret key
+     - `BASE_URL`: The domain Railway assigns to you (e.g., `https://web-production-xxxx.up.railway.app`)
+     - `PORT`: `PORT` (Railway usually sets this, but your app should use `process.env.PORT`)
+
+4. **Health Check:**
+   - Railway doesn't strictly require a health check path configuration like Render, but you can verify it at `/api/health`.
+
+
+
 ## Important Notes:
 
 ### CORS Configuration:
