@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, MapPin, DollarSign, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, MapPin, Eye } from 'lucide-react';
 import AuthContext from '../context/AuthContext';
 import { getProviderListings, deleteListing } from '../api/listings';
 import '../styles/Listings.css';
@@ -181,4 +181,3 @@ const ProviderDashboard = () => {
 };
 
 export default ProviderDashboard;
-
