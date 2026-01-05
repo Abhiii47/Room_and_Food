@@ -104,27 +104,35 @@ const HomePage = () => {
                 });
             }
 
+
             // Listings grid animation with scroll trigger
-            if (listingsRef.current) {
+            // run only ONCE when the component mounts or view mode changes, NOT when filtering changes
+            if (listingsRef.current && !loading) {
                 const listingCards = listingsRef.current.querySelectorAll('.listing-card');
                 if (listingCards.length > 0) {
-                    gsap.from(listingCards, {
-                        y: 60,
-                        opacity: 0,
-                        scale: 0.9,
-                        duration: 0.8,
-                        stagger: {
-                            amount: 0.6,
-                            from: 'start'
-                        },
-                        ease: 'back.out(1.2)',
-                        scrollTrigger: {
-                            trigger: listingsRef.current,
-                            start: 'top 75%',
-                            toggleActions: 'play none none none',
-                            once: true
-                        }
-                    });
+                    // Check if we already animated them to avoid re-animating on every keystroke
+                    if (!listingsRef.current.dataset.animated) {
+                        gsap.from(listingCards, {
+                            y: 60,
+                            opacity: 0,
+                            scale: 0.9,
+                            duration: 0.8,
+                            stagger: {
+                                amount: 0.6,
+                                from: 'start'
+                            },
+                            ease: 'back.out(1.2)',
+                            scrollTrigger: {
+                                trigger: listingsRef.current,
+                                start: 'top 75%',
+                                toggleActions: 'play none none none',
+                                once: true
+                            },
+                            onComplete: () => {
+                                if (listingsRef.current) listingsRef.current.dataset.animated = "true";
+                            }
+                        });
+                    }
                 }
             }
 
@@ -163,6 +171,72 @@ const HomePage = () => {
         { id: 'room', label: 'Rooms', icon: <Home size={18} /> },
         { id: 'food', label: 'Food', icon: <Coffee size={18} /> },
     ];
+
+    // Geolocation Search
+    const handleNearMe = () => {
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser");
+            return;
+        }
+        setLoading(true);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                fetchListingsByLocation(latitude, longitude);
+                setSearchQuery("Current Location");
+            },
+            () => {
+                alert("Unable to retrieve your location");
+                setLoading(false);
+            }
+        );
+    };
+
+    const fetchListingsByLocation = async (lat, lng) => {
+        try {
+            setLoading(true);
+            // Call backend with coordinates
+            const res = await apiClient.get('/listings', {
+                params: { lat, lng, radius: 50 } // 50km radius
+            });
+            if (res.data && Array.isArray(res.data)) {
+                setListings(res.data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch nearby listings:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Modified search handler to capture Enter key
+    const handleSearch = async (e) => {
+        if (e.key === 'Enter' && searchQuery.trim()) {
+            setLoading(true);
+            // Try to geocode the query first using OpenStreetMap logic
+            try {
+                const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`);
+                const geoData = await geoRes.json();
+
+                if (geoData && geoData.length > 0) {
+                    // Found a location match!
+                    const { lat, lon } = geoData[0];
+                    await fetchListingsByLocation(lat, lon);
+                } else {
+                    // Fallback to text filtering locally if not a location
+                    // Re-fetch all to ensure we have clear list to filter locally
+                    const res = await apiClient.get('/listings');
+                    setListings(res.data || []);
+                }
+            } catch (err) {
+                console.error("Geocoding failed, falling back to text search", err);
+                const res = await apiClient.get('/listings');
+                setListings(res.data || []);
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
 
     return (
         <div ref={containerRef} className="min-h-screen bg-background p-4 md:p-6 lg:p-8 transition-colors duration-300">
@@ -253,17 +327,20 @@ const HomePage = () => {
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search by city, college, or area..."
+                                onKeyDown={handleSearch}
+                                placeholder="Search by city, area, or zip code... (Press Enter)"
                                 className="w-full pl-12 pr-4 py-3 rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm"
                             />
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
                         </div>
-                        <div className="hidden md:block text-sm text-muted-foreground">
-                            Showing {filteredListings.length} results
-                        </div>
+                        <button
+                            onClick={handleNearMe}
+                            className="btn btn-outline flex items-center gap-2 whitespace-nowrap"
+                        >
+                            <MapPin size={18} /> Near Me
+                        </button>
                     </div>
 
-                    {/* Dynamic Content: List vs Map */}
                     {/* Dynamic Content: List vs Map */}
                     {viewMode === 'list' ? (
                         <div ref={listingsRef} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -288,6 +365,11 @@ const HomePage = () => {
                                                         <span key={i} className="text-xs px-2 py-1 rounded-md bg-secondary text-secondary-foreground">{tag}</span>
                                                     ))}
                                                 </div>
+                                                {item.distance !== undefined && (
+                                                    <div className="mb-2 text-xs font-semibold text-primary flex items-center gap-1">
+                                                        <MapPin size={12} /> {item.distance.toFixed(1)} km away
+                                                    </div>
+                                                )}
                                                 <div className="flex items-center justify-between pt-4 border-t border-border/50">
                                                     <div>
                                                         <span className="text-2xl font-bold text-primary">₹{item.price}</span>
