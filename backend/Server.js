@@ -12,9 +12,28 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? process.env.CLIENT_URL
-    : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      process.env.CLIENT_URL,
+      // Add local development URLs
+      'http://localhost:3000',
+      'http://127.0.0.1:3000'
+    ];
+
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // Normalize origins (remove trailing slashes) for comparison
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    const allowed = allowedOrigins.some(o => o && o.replace(/\/$/, '') === normalizedOrigin);
+
+    if (allowed || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      console.log('Blocked by CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
@@ -47,11 +66,25 @@ app.use('/api/reviews', require('./src/routes/reviews'));
 app.use('/api/admin', require('./src/routes/admin'));
 
 // Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../room-food-finder-frontend/build')));
+// Serve static files in production (only if build exists)
+const buildPath = path.join(__dirname, '../room-food-finder-frontend/build');
+const fs = require('fs');
+
+if (process.env.NODE_ENV === 'production' && fs.existsSync(buildPath)) {
+  app.use(express.static(buildPath));
 
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../room-food-finder-frontend/build', 'index.html'));
+    res.sendFile(path.join(buildPath, 'index.html'));
+  });
+} else {
+  // If no frontend build found (e.g. API-only deployment), show welcome message
+  app.get('/', (req, res) => {
+    res.json({
+      message: 'Room & Food Finder Backend API is running (API Only Mode)',
+      version: '1.0.0',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    });
   });
 }
 
@@ -114,24 +147,24 @@ const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI);
 
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-    console.log(`📊 Database Name: ${conn.connection.name}`);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log(`Database Name: ${conn.connection.name}`);
 
     // Handle connection events
     mongoose.connection.on('error', (err) => {
-      console.error('❌ MongoDB connection error:', err);
+      console.error('MongoDB connection error:', err);
     });
 
     mongoose.connection.on('disconnected', () => {
-      console.log('⚠️ MongoDB disconnected');
+      console.log('MongoDB disconnected');
     });
 
     mongoose.connection.on('reconnected', () => {
-      console.log('✅ MongoDB reconnected');
+      console.log('MongoDB reconnected');
     });
 
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
+    console.error('MongoDB connection error:', error);
     process.exit(1);
   }
 };
@@ -141,14 +174,14 @@ connectDB();
 
 // Graceful shutdown
 const gracefulShutdown = async (signal) => {
-  console.log(`\n🛑 Received ${signal}. Graceful shutdown...`);
+  console.log(`\nReceived ${signal}. Graceful shutdown...`);
 
   try {
     await mongoose.connection.close();
-    console.log('✅ MongoDB connection closed.');
+    console.log('MongoDB connection closed.');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error during graceful shutdown:', error);
+    console.error('Error during graceful shutdown:', error);
     process.exit(1);
   }
 };
@@ -158,22 +191,22 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {
-  console.error('❌ Unhandled Promise Rejection:', err);
+  console.error('Unhandled Promise Rejection:', err);
   process.exit(1);
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
-  console.error('❌ Uncaught Exception:', err);
+  console.error('Uncaught Exception:', err);
   process.exit(1);
 });
 
 // Start the server
 const server = app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🕒 Started at: ${new Date().toISOString()}`);
-  console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
+  console.log(`Server is running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Started at: ${new Date().toISOString()}`);
+  console.log(`API Base URL: http://localhost:${PORT}/api`);
 });
 
 // Handle server errors

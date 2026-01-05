@@ -37,7 +37,6 @@ const Header = () => {
             <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4">
                 <div className="flex items-center gap-2">
                     <Link className="flex items-center gap-2 font-bold text-xl tracking-tight" to="/">
-                        <span className="text-primary text-2xl">⚡</span>
                         <span>Room&Food</span>
                     </Link>
                 </div>
