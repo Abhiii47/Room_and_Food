@@ -176,8 +176,9 @@ const ProviderDashboard = () => {
                     </div>
                 )}
             </div>
-            );
+        </div>
+    );
 };
 
-            export default ProviderDashboard;
+export default ProviderDashboard;
 

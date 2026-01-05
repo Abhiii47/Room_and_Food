@@ -166,219 +166,281 @@ const CreateListing = () => {
 
     return (
         <div className="min-h-screen bg-background p-4 md:p-8">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-6xl mx-auto">
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition-colors"
+                    className="flex items-center gap-2 mb-8 text-muted-foreground hover:text-primary transition-colors group"
                 >
-                    <ArrowLeft size={20} />
-                    Back
+                    <div className="p-2 rounded-full bg-secondary/50 group-hover:bg-primary/10 transition-colors">
+                        <ArrowLeft size={20} />
+                    </div>
+                    <span className="font-medium">Back to Dashboard</span>
                 </button>
 
-                <div className="glass-panel p-6 md:p-8 rounded-2xl">
-                    <h1 className="text-3xl font-bold mb-6">
-                        {isEdit ? 'Edit Listing' : 'Create New Listing'}
-                    </h1>
-
-                    {error && (
-                        <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl">
-                            {error}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Header & Sidebar Info */}
+                    <div className="lg:col-span-1 space-y-6">
                         <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Title <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleChange}
-                                required
-                                className="w-full px-4 py-2 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary"
-                                placeholder="e.g., Cozy Room near Campus"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Description</label>
-                            <textarea
-                                name="description"
-                                value={formData.description}
-                                onChange={handleChange}
-                                rows={4}
-                                className="w-full px-4 py-2 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary"
-                                placeholder="Describe your listing..."
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Type <span className="text-red-500">*</span>
-                                </label>
-                                <select
-                                    name="type"
-                                    value={formData.type}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full px-4 py-2 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary"
-                                >
-                                    <option value="room">Room</option>
-                                    <option value="food">Food</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Price (₹/month)</label>
-                                <input
-                                    type="number"
-                                    name="price"
-                                    value={formData.price}
-                                    onChange={handleChange}
-                                    min="0"
-                                    className="w-full px-4 py-2 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary"
-                                    placeholder="5000"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Address <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="address"
-                                value={formData.address}
-                                onChange={handleChange}
-                                required
-                                className="w-full px-4 py-2 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary"
-                                placeholder="Full address"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Location Coordinates</label>
-                            <div className="flex gap-2 mb-2">
-                                <input
-                                    type="text"
-                                    name="lat"
-                                    value={formData.lat}
-                                    onChange={handleChange}
-                                    className="flex-1 px-4 py-2 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary"
-                                    placeholder="Latitude"
-                                />
-                                <input
-                                    type="text"
-                                    name="lng"
-                                    value={formData.lng}
-                                    onChange={handleChange}
-                                    className="flex-1 px-4 py-2 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary"
-                                    placeholder="Longitude"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={getCurrentLocation}
-                                    className="btn btn-outline flex items-center gap-2"
-                                >
-                                    <MapPin size={18} />
-                                    Use Current
-                                </button>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                                Coordinates help users find your listing on the map. Click "Use Current" to auto-fill.
+                            <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                                {isEdit ? 'Edit Listing' : 'Create New Listing'}
+                            </h1>
+                            <p className="text-lg text-muted-foreground">
+                                {isEdit ? 'Update your property details.' : 'Share your space or food service with thousands of students and professionals.'}
                             </p>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Amenities (comma-separated)</label>
-                            <input
-                                type="text"
-                                name="amenities"
-                                value={formData.amenities}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary"
-                                placeholder="WiFi, AC, Geyser, Security"
-                            />
+                        <div className="glass-card p-6 rounded-2xl border border-white/10 hidden lg:block">
+                            <h3 className="font-semibold mb-4 flex items-center gap-2">
+                                <span className="bg-emerald-500/20 text-emerald-500 p-1.5 rounded-lg"><Upload size={16} /></span>
+                                Quick Tips
+                            </h3>
+                            <ul className="space-y-3 text-sm text-muted-foreground">
+                                <li className="flex gap-2">
+                                    <span className="text-primary">•</span>
+                                    Provide a catchy title to attract more views.
+                                </li>
+                                <li className="flex gap-2">
+                                    <span className="text-primary">•</span>
+                                    Upload high-quality images of the room or food.
+                                </li>
+                                <li className="flex gap-2">
+                                    <span className="text-primary">•</span>
+                                    Pinpoint your exact location for better search results.
+                                </li>
+                            </ul>
                         </div>
+                    </div>
 
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Tags (comma-separated)</label>
-                            <input
-                                type="text"
-                                name="tags"
-                                value={formData.tags}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary"
-                                placeholder="furnished, student-friendly, near-campus"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Images (up to 6)
-                            </label>
-                            <div className="border-2 border-dashed border-border rounded-xl p-6 text-center">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    multiple
-                                    onChange={handleImageChange}
-                                    className="hidden"
-                                    id="image-upload"
-                                />
-                                <label
-                                    htmlFor="image-upload"
-                                    className="cursor-pointer flex flex-col items-center gap-2"
-                                >
-                                    <Upload size={32} className="text-muted-foreground" />
-                                    <span className="text-sm text-muted-foreground">
-                                        Click to upload images
-                                    </span>
-                                </label>
-                            </div>
-                            {imagePreviews.length > 0 && (
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                                    {imagePreviews.map((preview, index) => (
-                                        <div key={index} className="relative">
-                                            <img
-                                                src={preview}
-                                                alt={`Preview ${index + 1}`}
-                                                className="w-full h-32 object-cover rounded-xl"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => removeImage(index)}
-                                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                                            >
-                                                <X size={16} />
-                                            </button>
-                                        </div>
-                                    ))}
+                    {/* Main Form */}
+                    <div className="lg:col-span-2">
+                        <div className="glass-panel p-6 md:p-8 rounded-3xl border border-white/10 shadow-xl">
+                            {error && (
+                                <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 text-red-600 rounded-xl flex items-center gap-3">
+                                    <div className="p-2 bg-red-500/20 rounded-full shrink-0"><X size={16} /></div>
+                                    {error}
                                 </div>
                             )}
-                        </div>
 
-                        <div className="flex gap-4 pt-4">
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="flex-1 btn btn-primary py-3 rounded-xl font-bold"
-                            >
-                                {loading ? 'Saving...' : isEdit ? 'Update Listing' : 'Create Listing'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => navigate(-1)}
-                                className="btn btn-outline py-3 rounded-xl"
-                            >
-                                Cancel
-                            </button>
+                            <form onSubmit={handleSubmit} className="space-y-8">
+                                {/* Section 1: Basic Info */}
+                                <div className="space-y-6">
+                                    <h2 className="text-xl font-semibold border-b border-border/50 pb-2">Basic Details</h2>
+
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1.5 ml-1">Title <span className="text-red-500">*</span></label>
+                                            <input
+                                                type="text"
+                                                name="title"
+                                                value={formData.title}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full px-4 py-3 rounded-xl border border-border/50 bg-secondary/30 focus:bg-background focus:ring-2 focus:ring-primary/50 transition-all font-medium placeholder:text-muted-foreground/50"
+                                                placeholder="e.g. Spacious Studio near University"
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium mb-1.5 ml-1">Type <span className="text-red-500">*</span></label>
+                                                <div className="relative">
+                                                    <select
+                                                        name="type"
+                                                        value={formData.type}
+                                                        onChange={handleChange}
+                                                        required
+                                                        className="w-full px-4 py-3 rounded-xl border border-border/50 bg-secondary/30 focus:bg-background focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
+                                                    >
+                                                        <option value="room">🏡 Room / Hostel</option>
+                                                        <option value="food">🍽️ Food / Tiffin</option>
+                                                    </select>
+                                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">▼</div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium mb-1.5 ml-1">Price (₹/month)</label>
+                                                <input
+                                                    type="number"
+                                                    name="price"
+                                                    value={formData.price}
+                                                    onChange={handleChange}
+                                                    min="0"
+                                                    className="w-full px-4 py-3 rounded-xl border border-border/50 bg-secondary/30 focus:bg-background focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/50"
+                                                    placeholder="5000"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1.5 ml-1">Description</label>
+                                            <textarea
+                                                name="description"
+                                                value={formData.description}
+                                                onChange={handleChange}
+                                                rows={4}
+                                                className="w-full px-4 py-3 rounded-xl border border-border/50 bg-secondary/30 focus:bg-background focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/50 resize-none"
+                                                placeholder="Describe the amenities, rules, and vibe..."
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Section 2: Location */}
+                                <div className="space-y-6">
+                                    <h2 className="text-xl font-semibold border-b border-border/50 pb-2">Location</h2>
+
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1.5 ml-1">Address <span className="text-red-500">*</span></label>
+                                            <div className="relative">
+                                                <MapPin className="absolute left-4 top-3.5 text-muted-foreground" size={18} />
+                                                <input
+                                                    type="text"
+                                                    name="address"
+                                                    value={formData.address}
+                                                    onChange={handleChange}
+                                                    required
+                                                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-border/50 bg-secondary/30 focus:bg-background focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/50"
+                                                    placeholder="Complete address including city & pincode"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-primary/5 p-4 rounded-xl border border-primary/10">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <label className="text-sm font-semibold text-primary">Map Coordinates</label>
+                                                <button
+                                                    type="button"
+                                                    onClick={getCurrentLocation}
+                                                    className="btn btn-xs btn-primary rounded-lg flex items-center gap-1.5"
+                                                >
+                                                    <MapPin size={14} /> Auto-Detect
+                                                </button>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <input
+                                                    type="text"
+                                                    name="lat"
+                                                    value={formData.lat}
+                                                    onChange={handleChange}
+                                                    className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-sm"
+                                                    placeholder="Latitude"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    name="lng"
+                                                    value={formData.lng}
+                                                    onChange={handleChange}
+                                                    className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-sm"
+                                                    placeholder="Longitude"
+                                                />
+                                            </div>
+                                            <p className="text-xs text-muted-foreground mt-2 opacity-80">
+                                                * Essential for "Near Me" search. Click Auto-Detect while at the location.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Section 3: Extra Info */}
+                                <div className="space-y-6">
+                                    <h2 className="text-xl font-semibold border-b border-border/50 pb-2">Features & Media</h2>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1.5 ml-1">Amenities</label>
+                                            <input
+                                                type="text"
+                                                name="amenities"
+                                                value={formData.amenities}
+                                                onChange={handleChange}
+                                                className="w-full px-4 py-3 rounded-xl border border-border/50 bg-secondary/30 focus:bg-background focus:ring-2 focus:ring-primary/50"
+                                                placeholder="WiFi, AC, Parking..."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1.5 ml-1">Tags</label>
+                                            <input
+                                                type="text"
+                                                name="tags"
+                                                value={formData.tags}
+                                                onChange={handleChange}
+                                                className="w-full px-4 py-3 rounded-xl border border-border/50 bg-secondary/30 focus:bg-background focus:ring-2 focus:ring-primary/50"
+                                                placeholder="Students, Girls Only..."
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-3 ml-1">Photos (Max 6)</label>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            {/* Upload Button */}
+                                            <div className="col-span-2 md:col-span-1 relative group">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    multiple
+                                                    onChange={handleImageChange}
+                                                    className="hidden"
+                                                    id="image-upload"
+                                                    disabled={images.length >= 6}
+                                                />
+                                                <label
+                                                    htmlFor="image-upload"
+                                                    className={`w-full aspect-square flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${images.length >= 6
+                                                            ? 'border-border bg-secondary/50 opacity-50 cursor-not-allowed'
+                                                            : 'border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary'
+                                                        }`}
+                                                >
+                                                    <div className="p-3 bg-primary/10 text-primary rounded-full group-hover:scale-110 transition-transform">
+                                                        <Upload size={24} />
+                                                    </div>
+                                                    <span className="text-xs font-semibold text-primary">Add Photos</span>
+                                                </label>
+                                            </div>
+
+                                            {/* Previews */}
+                                            {imagePreviews.map((preview, index) => (
+                                                <div key={index} className="relative aspect-square group">
+                                                    <img
+                                                        src={preview}
+                                                        alt={`Preview ${index + 1}`}
+                                                        className="w-full h-full object-cover rounded-2xl shadow-sm border border-border/50"
+                                                    />
+                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeImage(index)}
+                                                            className="bg-red-500/90 text-white p-2 rounded-full hover:bg-red-600 transition-colors shadow-lg"
+                                                        >
+                                                            <X size={16} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4 pt-6 border-t border-border/50">
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate(-1)}
+                                        className="flex-1 btn btn-outline py-4 rounded-xl text-base font-medium"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="flex-[2] btn btn-primary py-4 rounded-xl text-base font-bold shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all"
+                                    >
+                                        {loading ? 'Publishing...' : isEdit ? 'Update Details' : 'Publish Listing'}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

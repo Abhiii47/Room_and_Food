@@ -131,6 +131,48 @@ const AboutPage = () => {
                 </div>
             </div>
 
+            {/* Join Community Section */}
+            <div className="bg-primary/5 py-24 relative overflow-hidden">
+                <div className="max-w-7xl mx-auto px-4 text-center">
+                    <h2 className="text-3xl font-bold mb-6">Join Our Growing Community</h2>
+                    <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
+                        We are more than just a platform; we are a community of students, professionals, and property owners working together.
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-8 md:gap-16">
+                        <div className="text-center">
+                            <div className="text-4xl font-bold text-primary mb-2">5,000+</div>
+                            <div className="text-sm text-muted-foreground uppercase tracking-wider">Active Users</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-4xl font-bold text-purple-500 mb-2">1,200+</div>
+                            <div className="text-sm text-muted-foreground uppercase tracking-wider">Verified Listings</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-4xl font-bold text-orange-500 mb-2">50+</div>
+                            <div className="text-sm text-muted-foreground uppercase tracking-wider">Cities Covered</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Contact Section */}
+            <div className="max-w-7xl mx-auto px-4 py-24 text-center">
+                <div className="glass-panel p-8 md:p-12 rounded-3xl border border-white/10 max-w-3xl mx-auto">
+                    <h2 className="text-3xl font-bold mb-6">Have Questions?</h2>
+                    <p className="text-lg text-muted-foreground mb-8">
+                        Whether you need help finding a room or want to list your property, our support team is here for you 24/7.
+                    </p>
+                    <div className="flex flex-col md:flex-row justify-center gap-4">
+                        <a href="mailto:support@roomfoodfinder.com" className="btn btn-primary rounded-full px-8 py-3">
+                            Email Support
+                        </a>
+                        <a href="tel:+1234567890" className="btn btn-outline rounded-full px-8 py-3">
+                            Call Us: +91 98765 43210
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <footer className="border-t border-border/40 py-12 text-center text-sm text-muted-foreground">
                 <p>&copy; {new Date().getFullYear()} Room & Food Finder. Made with <span className="text-red-500">❤</span> for explorers.</p>
             </footer>
